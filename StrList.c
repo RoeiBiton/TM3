@@ -1,6 +1,7 @@
 #include "StrList.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 // Node & List Data Structures
 typedef struct _node {
@@ -8,10 +9,10 @@ typedef struct _node {
     struct _node * _next;
 } Node;
 
-struct _StrList {
+typedef struct _StrList {
     Node* _head;
     size_t _size;
-};
+}StrList;
 
 
 //------------------------------------------------
@@ -65,7 +66,7 @@ size_t StrList_size(const StrList* StrList) {
 
 Node* getNodeAt(const StrList* StrList, int index){
     if(StrList==NULL || index<0){return NULL;}
-    if(StrList->_size<index+1){return NULL}
+    if(StrList->_size<index+1){return NULL;}
     Node* p1= StrList->_head;
     if(index==0){return p1;}
     else {
@@ -76,10 +77,9 @@ Node* getNodeAt(const StrList* StrList, int index){
     return p1;
 }
 
-
-void StrList_insertLast(const StrList* StrList, char* data) {
+void StrList_insertLast(StrList* StrList, const char* data) {
     Node* newNode= Node_alloc(strdup(data), NULL);
-    Node* lastNode= getNodeAt(StrList,(int)StrList->_size-1)
+    Node* lastNode= getNodeAt(StrList,(int)StrList->_size-1);
     if(lastNode==NULL){
         StrList->_head = newNode;
     }
@@ -87,6 +87,23 @@ void StrList_insertLast(const StrList* StrList, char* data) {
         lastNode->_next=newNode;
     }
     StrList->_size++;
+}
+
+void StrList_insertAt(StrList* StrList, const char* data,int index){
+    if (index < 0 || StrList->_size<index+1){return;}
+    Node* newNode= Node_alloc(strdup(data), NULL);
+    Node* p1 = getNodeAt(StrList, index);
+    if(index==0){
+        newNode->_next=p1;
+        StrList->_head=newNode;
+    }
+    else{
+        Node* p0 = getNodeAt(StrList, index-1);
+        newNode->_next=p1;
+        p0->_next=newNode;
+    }
+    StrList->_size++;
+
 }
 
 char* StrList_firstData(const StrList* StrList) {
@@ -112,26 +129,74 @@ void StrList_print(const StrList* StrList) {
  Prints the word at the given index to the standard output.
 */
 void StrList_printAt(const StrList* Strlist,int index) {
-    if (Strlist == NULL || index < 0) { return NULL }
-    if (index <= (Strlist->_size) - 1) {
-        Node *p = getNodeAt(Strlist, index);
-        printf(" %s", p->_data);
+    if (Strlist != NULL && index >= 0) {
+        if (index <= (Strlist->_size) - 1) {
+            Node *p = getNodeAt(Strlist, index);
+            printf(" %s", p->_data);
+        }
     }
 }
 /*
  * Return the amount of chars in the list.
 */
-int StrList_printLen(const StrList* Strlist);
+//check if -1 or 0
+int StrList_printLen(const StrList* Strlist){
+    if(Strlist==NULL){return -1;}
+    int len= 0;
+    Node* p0 =Strlist->_head;
+    for(int i=0; i<Strlist->_size;i++){
+        len= len+ strlen(p0->_data);
+        p0=p0->_next;
+    }
+}
 
 /*
 Given a string, return the number of times it exists in the list.
 */
-int StrList_count(StrList* StrList, const char* data);
-
+int StrList_count(StrList* StrList, const char* data) {
+    int counter = 0;
+    if (StrList == NULL || data == NULL) { return 0;}
+    Node *p0 = StrList->_head;
+    for(int i=0; i<StrList->_size; i++) {
+        int cmp = strcmp(p0->_data, data);
+        if (cmp == 0) {
+            counter++;
+        }
+        p0=p0->_next;
+    }
+}
 /*
 	Given a string and a list, remove all the appearences of this string in the list.
 */
-void StrList_remove(StrList* StrList, const char* data);
+void StrList_remove(StrList* StrList, const char* data) {
+    if (StrList == NULL || data == NULL) { return; }
+    Node* p0 = StrList->_head;
+    int cmp= strcmp(p0->_data,data);
+    if(cmp==0){
+        if(p0->_next==NULL) {
+            StrList_free(StrList);
+            return;
+        }
+        else{
+            StrList->_head=p0->_next;
+            Node_free(p0);
+        }
+    }
+    else{
+        for(int i=1; i<StrList->_size;i++){
+            Node* p1= getNodeAt(StrList,i);
+            int cmp= strcmp(p1->_data,data);
+            if(cmp==0){
+                Node* prev= getNodeAt(StrList,i-1);
+                prev->_next=p1->_next;
+                Node_free(p1);
+                StrList->_size--;
+                i--;
+            }
+        }
+    }
+}
+
 
 /*
 	Given an index and a list, remove the string at that index.
@@ -158,7 +223,23 @@ void StrList_removeAt(StrList* StrList, int index) {
  * Checks if two StrLists have the same elements
  * returns 0 if not and any other number if yes
  */
-int StrList_isEqual(const StrList* StrList1, const StrList* StrList2);
+int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
+    int ans=1;
+    if(StrList1->_size!=StrList2->_size){return 0;}
+    if(StrList1==NULL && StrList2==NULL){return 1;}
+    Node* p1 = StrList1->_head;
+    Node* p2 = StrList2->_head;
+    for(int i=0; i<StrList1->_size;i++){
+        int cmp = strcmp(p1->_data,p2->_data);
+        if(cmp!=0){
+            ans=0;
+            return ans;
+        }
+        p1=p1->_next;
+        p2=p2->_next;
+    }
+    return ans;
+}
 
 /*
  * Clones the given StrList.
