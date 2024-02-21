@@ -89,26 +89,35 @@ void StrList_insertLast(const StrList* StrList, char* data) {
     StrList->_size++;
 }
 
-char* StrList_firstData(const StrList* StrList);
-
+char* StrList_firstData(const StrList* StrList) {
+    Node *head = StrList->_head;
+    if (head == NULL) { return NULL; }
+    return head->_data;
+}
 /*
  * Prints the StrList to the standard output.
  */
-void StrList_print(const StrList* StrList);
-Node* p = StrList->_head;
-while(p!=NULL){
-    printf("%c", p->_data);
-    if(p->_next!=NULL){
-        printf(" ");
-        p=p->_next;
+void StrList_print(const StrList* StrList) {
+    Node *p = StrList->_head;
+    while (p != NULL) {
+        printf("%s", p->_data);
+        if (p->_next != NULL) {
+            printf(" ");
+            p = p->_next;
+        }
     }
 }
 
 /*
  Prints the word at the given index to the standard output.
 */
-void StrList_printAt(const StrList* Strlist,int index);
-
+void StrList_printAt(const StrList* Strlist,int index) {
+    if (Strlist == NULL || index < 0) { return NULL }
+    if (index <= (Strlist->_size) - 1) {
+        Node *p = getNodeAt(Strlist, index);
+        printf(" %s", p->_data);
+    }
+}
 /*
  * Return the amount of chars in the list.
 */
@@ -127,25 +136,24 @@ void StrList_remove(StrList* StrList, const char* data);
 /*
 	Given an index and a list, remove the string at that index.
 */
-void StrList_removeAt(StrList* StrList, int index);
-    if(StrList==NULL || index<0){return;}
-    if(index==0){
-        StrList->_head=(StrList->_head)->_next;
+void StrList_removeAt(StrList* StrList, int index) {
+    if (StrList == NULL || index < 0) { return; }
+    if (index == 0) {
+        StrList->_head = (StrList->_head)->_next;
     }
-    if(index-1<=StrList->_size){
-        Node* p1= getNodeAt(StrList, index-1);
-        Node* p2= getNodeAt(StrList, index+1);
-        Node* t= getNodeAt(StrList, index);
-        if(p2==NULL){
-            p1->_next=NULL;
+    if (index - 1 <= StrList->_size) {
+        Node *p1 = getNodeAt(StrList, index - 1);
+        Node *p2 = getNodeAt(StrList, index + 1);
+        Node *t = getNodeAt(StrList, index);
+        if (p2 == NULL) {
+            p1->_next = NULL;
+            Node_free(t);
+        } else {
+            p1->_next = p2;
             Node_free(t);
         }
-        else{
-            p1->_next=p2;
-            Node_free(t);
-        }
     }
-
+}
 /*
  * Checks if two StrLists have the same elements
  * returns 0 if not and any other number if yes
