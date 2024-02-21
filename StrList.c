@@ -63,7 +63,7 @@ size_t StrList_size(const StrList* StrList) {
     return StrList->_size;
 }
 
-Node* getNodeAt(StrList* StrList, int index){
+Node* getNodeAt(const StrList* StrList, int index){
     if(StrList==NULL || index<0){return NULL;}
     if(StrList->_size<index+1){return NULL}
     Node* p1= StrList->_head;
@@ -76,8 +76,8 @@ Node* getNodeAt(StrList* StrList, int index){
     return p1;
 }
 
-//checkConst
-void StrList_insertLast(StrList* StrList, char* data) {
+
+void StrList_insertLast(const StrList* StrList, char* data) {
     Node* newNode= Node_alloc(strdup(data), NULL);
     Node* lastNode= getNodeAt(StrList,(int)StrList->_size-1)
     if(lastNode==NULL){
@@ -95,6 +95,14 @@ char* StrList_firstData(const StrList* StrList);
  * Prints the StrList to the standard output.
  */
 void StrList_print(const StrList* StrList);
+Node* p = StrList->_head;
+while(p!=NULL){
+    printf("%c", p->_data);
+    if(p->_next!=NULL){
+        printf(" ");
+        p=p->_next;
+    }
+}
 
 /*
  Prints the word at the given index to the standard output.
@@ -120,6 +128,23 @@ void StrList_remove(StrList* StrList, const char* data);
 	Given an index and a list, remove the string at that index.
 */
 void StrList_removeAt(StrList* StrList, int index);
+    if(StrList==NULL || index<0){return;}
+    if(index==0){
+        StrList->_head=(StrList->_head)->_next;
+    }
+    if(index-1<=StrList->_size){
+        Node* p1= getNodeAt(StrList, index-1);
+        Node* p2= getNodeAt(StrList, index+1);
+        Node* t= getNodeAt(StrList, index);
+        if(p2==NULL){
+            p1->_next=NULL;
+            Node_free(t);
+        }
+        else{
+            p1->_next=p2;
+            Node_free(t);
+        }
+    }
 
 /*
  * Checks if two StrLists have the same elements
