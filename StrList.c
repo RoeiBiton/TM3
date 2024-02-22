@@ -120,8 +120,8 @@ void StrList_print(const StrList* StrList) {
         printf("%s", p->_data);
         if (p->_next != NULL) {
             printf(" ");
-            p = p->_next;
         }
+        p = p->_next;
     }
 }
 
@@ -245,23 +245,63 @@ int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
  * Clones the given StrList.
  * It's the user responsibility to free it with StrList_free.
  */
-StrList* StrList_clone(const StrList* StrList);
-
+StrList* StrList_clone(const StrList* StrList) {
+    if (StrList == NULL) { return NULL; }
+    struct _StrList *cloneList = (struct _StrList *) StrList_alloc();
+    for (int i = 0; i < StrList->_size; i++) {
+        Node *clone = getNodeAt(StrList, i);
+        char *data = strdup(clone->_data);
+        StrList_insertLast((struct _StrList *) cloneList, data);
+    }
+    return (struct _StrList*) cloneList;
+}
 /*
  * Reverces the given StrList.
  */
-void StrList_reverse( StrList* StrList);
+void StrList_reverse( StrList* StrList){
+    struct _StrList* cloneList = (struct _StrList *) StrList_alloc();
+    cloneList = StrList_clone(StrList);
+    for(int i=StrList->_size-1; i<0;i--){
+        Node_free(getNodeAt(StrList,i));
+    }
+    StrList->_head->_data= getNodeAt(cloneList,cloneList->_size-1)->_data;
+    for(int i=cloneList->_size-2;i>=0;i--){
+        Node* p = getNodeAt(cloneList,i);
+        char* data= p->_data;
+        StrList_insertLast(StrList, data);
+    }
+}
 
 /*
  * Sort the given list in lexicographical order
  */
-void StrList_sort( StrList* StrList);
+void StrList_sort( StrList* StrList) {
+    if (StrList == NULL) { return; }
+    if(StrList->_size==1){return;}
+    for(int i=0; i<StrList->_size-1;i++) {
+        for (int j = 0; j < StrList->_size - i - 1; j++) {
+            Node* p1 = getNodeAt(StrList,i);
+            Node* p2 = getNodeAt(StrList,i+1);
+            if(strcmp(p1->_data,p2->_data)>0){}
+                char* temp=p1->_data;
+                p1->_data=p2->_data;
+                p2->_data=temp;
+            }
+        }
+    }
 
 /*
  * Checks if the given list is sorted in lexicographical order
  * returns 1 for sorted,   0 otherwise
  */
-int StrList_isSorted(StrList* StrList);
-
+int StrList_isSorted(StrList* StrList) {
+    if (StrList == NULL) { return 1; }
+    Node* p0 = StrList->_head;
+    for(int i =0; i<StrList->_size; i++){
+        int cmp=strcmp(p0->_data,(p0->_next)->_data);
+        if(cmp<0){return 0;}
+    }
+    return 1;
+}
 
 //------------------------------------------------
